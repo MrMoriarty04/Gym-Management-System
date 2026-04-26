@@ -1,0 +1,94 @@
+MODEL: User
+-----------------------------------------
+FIELDS:
+  name         : String  (Required)
+  email        : String  (Required, Unique)
+  password     : String  (Required)
+  
+ Role Management
+  role         : String  (Enum: ['Admin', 'Coach', 'Trainee'], Default: 'Trainee')
+  
+  - Security / OTP Fields
+  otp          : String
+  otpExpires   : Date
+  
+ -  Trainee-Specific Fields (Populated only if role is 'Trainee')
+  coachId      : ObjectId (References: 'User')
+  subscription : Object {
+      plan      : Number  (Enum: [1, 3, 6, 12])
+      startDate : Date
+      endDate   : Date
+      isActive  : Boolean (Default: false)
+  }
+
+OPTIONS:
+  timestamps   : True
+  ========================================================================
+
+  MODEL: Workout
+-----------------------------------------
+FIELDS:
+  - Relations
+  traineeId       : ObjectId (References: 'User', Required)
+  coachId         : ObjectId (References: 'User', Required)
+  
+  - Workout Info
+  title           : String   (Required) // e.g., "Upper Body Day"
+  date            : Date     (Required) // When to do this workout
+  
+  - The Routine
+  exercises       : Array of Objects [
+      {
+          name  : String (Required)
+          sets  : Number (Required)
+          reps  : Number (Required)
+          notes : String // e.g., "Rest 60 seconds between sets"
+      }
+  ]
+  
+  // Feedback
+  traineeFeedback : String   // Notes from trainee after finishing
+
+OPTIONS:
+  timestamps      : True
+
+  ================================================
+
+  MODEL: Diet
+-----------------------------------------
+FIELDS:
+  - Relations
+  traineeId             : ObjectId (References: 'User', Required)
+  
+  - Diet Goals
+  date                  : Date     (Required) // Target date
+  targetedDiet          : Object {
+      calories : Number (Required)
+      protein  : Number (Required)
+      carbs    : Number (Required)
+      fat      : Number (Required)
+  }
+  
+ Meals Tracking (Populated by Trainee input & AI response)
+  meals                 : Array of Objects [
+      {
+          mealName             : String (Required) // e.g., "Lunch"
+          ingredients          : String (Required) // What the trainee typed
+          
+          // Values returned from AI API
+          aiCalculatedCalories : Number            
+          aiCalculatedProtein  : Number
+          aiCalculatedCarbs    : Number
+          aiCalculatedFat      : Number
+      }
+  ]
+  
+  // Summary (We update these totals every time a new meal is added)
+  totalConsumed         : Object {
+      calories : Number (Default: 0)
+      protein  : Number (Default: 0)
+      carbs    : Number (Default: 0)
+      fat      : Number (Default: 0)
+  }
+OPTIONS:
+  timestamps            : True
