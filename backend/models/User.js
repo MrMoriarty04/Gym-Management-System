@@ -9,7 +9,8 @@ const userSchema = new mongoose.Schema({
  otpExpires:{type:Date},
  coachId: { 
   type: mongoose.Schema.Types.ObjectId, 
-  ref: 'User' 
+  ref: 'User' ,
+  default: null
 },
 subscription: {
     plan: { type: Number, enum: [1, 3, 6, 12] },
