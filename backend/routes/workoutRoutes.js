@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { authorized } = require('../middlewares/authMiddleware');
+const { protect } = require('../middlewares/authMiddleware');
 const { createWorkout, getWorkouts,updateWorkout,deleteWorkout } = require('../controllers/workoutController');
 
-router.post('/',authorized, createWorkout);
+router.post('/',protect, createWorkout);
 
 
-router.get('/:traineeId',authorized, getWorkouts);
+router.get('/:traineeId',protect, getWorkouts);
 
-router.put('/:workoutId',authorized, updateWorkout);
+router.put('/:workoutId',protect, updateWorkout);
 
-router.delete('/:workoutId',authorized, deleteWorkout);
+router.delete('/:workoutId',protect, deleteWorkout);
 module.exports = router;
