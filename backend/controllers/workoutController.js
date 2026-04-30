@@ -2,12 +2,13 @@ const Workout = require('../models/Workout');
 
 const createWorkout = async (req, res) => {
   try {
-    const { traineeId ,coachId,title,date,exercises} = req.body;
+    const { traineeId, title, date, exercises } = req.body; 
+    
+    const coachId = req.user._id; 
 
-    if (!traineeId || !coachId || !title || !date || !exercises || exercises.length === 0) {
+    if (!traineeId || !title || !date || !exercises || exercises.length === 0) {
       return res.status(400).json({ message: "Please provide required fields" });
     }
-
     const workout = await Workout.create({
       traineeId,
       coachId,
@@ -46,8 +47,11 @@ const updateWorkout = async (req, res) => {
     
     const updates = req.body;
 
-    const updatedWorkout = await Workout.findByIdAndUpdate(workoutId, updates, { new: true });
-
+const updatedWorkout = await Workout.findOneAndUpdate(
+      { _id: workoutId, coachId: req.user._id }, 
+      updates, 
+      { new: true }
+    );
     if (!updatedWorkout) {
       return res.status(404).json({ message: "Workout not found" });
     }
@@ -65,8 +69,10 @@ const deleteWorkout = async (req, res) => {
   try {
     const { workoutId } = req.params;
 
-    const deletedWorkout = await Workout.findByIdAndDelete(workoutId);
-
+const deletedWorkout = await Workout.findOneAndDelete({ 
+      _id: workoutId, 
+      coachId: req.user._id 
+    });
     if (!deletedWorkout) {
       return res.status(404).json({ message: "Workout not found" });
     }

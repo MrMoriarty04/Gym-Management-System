@@ -6,6 +6,15 @@ const sendEmail = require('../utils/sendEmail');
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' }); 
 };
+
+const cookieOptions = {
+  httpOnly: true, 
+  secure: process.env.NODE_ENV !== 'development', 
+  sameSite: 'strict', 
+  maxAge: 30 * 24 * 60 * 60 * 1000,
+};
+
+
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -28,13 +37,16 @@ const hashedPassword = await bcrypt.hash(password, salt);
       role
     })
 
-    if (user) {
+   if (user) {
+      const token = generateToken(user._id);
+      res.cookie('jwt', token, cookieOptions);
+
       res.status(201).json({
         _id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
-        message: "account created successfully"
+        message: "Account created and logged in successfully"
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
@@ -56,13 +68,15 @@ const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    if (user && (await bcrypt.compare(password, user.password))) {
+   if (user && (await bcrypt.compare(password, user.password))) {
+      const token = generateToken(user._id);
+      res.cookie('jwt', token, cookieOptions);
+
       res.status(200).json({
         _id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id),   
         message: "Logged in successfully"
       });
     } else {
@@ -89,7 +103,14 @@ const getUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
+const logoutUser = (req, res) => {
+  res.cookie('jwt', '', {
+    httpOnly: true,
+    expires: new Date(0) 
+  });
+  
+  res.status(200).json({ message: "Logged out successfully" });
+};
 
 
 const updateUser = async (req, res) => {
@@ -227,5 +248,6 @@ module.exports = {
   deleteUser,
   getCoachTrainees,
   resetPassword,
-  forgotPassword
+  forgotPassword,
+  logoutUser
 };
