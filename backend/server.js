@@ -18,6 +18,15 @@ app.use('/api/users', userRoutes);
 const workoutRoutes = require('./routes/workoutRoutes');
 app.use('/api/workouts', workoutRoutes);
 
+const authRoutes = require('./routes/authRoutes');
+app.use('/api/auth', authRoutes);
+
+const coachRoutes = require('./routes/coachRoutes');
+app.use('/api/coach', coachRoutes);
+
+const traineeRoutes = require('./routes/traineeRoutes');
+app.use('/api/trainee', traineeRoutes);
+
 
 
 

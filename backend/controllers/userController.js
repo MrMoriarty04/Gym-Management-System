@@ -1,19 +1,18 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const sendEmail = require('../utils/sendEmail');
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const sendEmail = require("../utils/sendEmail");
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' }); 
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
 const cookieOptions = {
-  httpOnly: true, 
-  secure: process.env.NODE_ENV !== 'development', 
-  sameSite: 'strict', 
+  httpOnly: true,
+  secure: process.env.NODE_ENV !== "development",
+  sameSite: "strict",
   maxAge: 30 * 24 * 60 * 60 * 1000,
 };
-
 
 const registerUser = async (req, res) => {
   try {
@@ -23,35 +22,34 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "please fill all the blanks " });
     }
 
-        const userExists =await User.findOne({email});
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "email is already exist" });
     }
 
-    const salt = await bcrypt.genSalt(10); 
-const hashedPassword = await bcrypt.hash(password, salt);
-    const user =await User.create({
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const user = await User.create({
       name,
-      password:hashedPassword,
+      password: hashedPassword,
       email,
-      role
-    })
+      role,
+    });
 
-   if (user) {
+    if (user) {
       const token = generateToken(user._id);
-      res.cookie('jwt', token, cookieOptions);
+      res.cookie("jwt", token, cookieOptions);
 
       res.status(201).json({
         _id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
-        message: "Account created and logged in successfully"
+        message: "Account created and logged in successfully",
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
     }
-
   } catch (error) {
     console.error("Error in registerUser:", error);
     res.status(500).json({ message: "server error" });
@@ -63,26 +61,27 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Please provide email and password" });
+      return res
+        .status(400)
+        .json({ message: "Please provide email and password" });
     }
 
     const user = await User.findOne({ email });
 
-   if (user && (await bcrypt.compare(password, user.password))) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       const token = generateToken(user._id);
-      res.cookie('jwt', token, cookieOptions);
+      res.cookie("jwt", token, cookieOptions);
 
       res.status(200).json({
         _id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
-        message: "Logged in successfully"
+        message: "Logged in successfully",
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });
     }
-
   } catch (error) {
     console.error("Error in loginUser:", error);
     res.status(500).json({ message: "Server error" });
@@ -91,12 +90,12 @@ const loginUser = async (req, res) => {
 const getUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await User.findById(id).select('-password');
+    const user = await User.findById(id).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     res.status(200).json(user);
   } catch (error) {
     console.error(error);
@@ -104,14 +103,13 @@ const getUser = async (req, res) => {
   }
 };
 const logoutUser = (req, res) => {
-  res.cookie('jwt', '', {
+  res.cookie("jwt", "", {
     httpOnly: true,
-    expires: new Date(0) 
+    expires: new Date(0),
   });
-  
+
   res.status(200).json({ message: "Logged out successfully" });
 };
-
 
 const updateUser = async (req, res) => {
   try {
@@ -123,19 +121,22 @@ const updateUser = async (req, res) => {
       updates.password = await bcrypt.hash(updates.password, salt);
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true }).select('-password');
+    const updatedUser = await User.findByIdAndUpdate(id, updates, {
+      new: true,
+    }).select("-password");
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ message: "User updated successfully", user: updatedUser });
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 const deleteUser = async (req, res) => {
   try {
@@ -155,14 +156,14 @@ const deleteUser = async (req, res) => {
 };
 const getCoachTrainees = async (req, res) => {
   try {
-    const trainees = await User.find({ 
-      coachId: req.user.id, 
-      role: 'Trainee' 
-    }).select('-password'); 
+    const trainees = await User.find({
+      coachId: req.user.id,
+      role: "trainee",
+    }).select("-password");
 
     res.status(200).json({
       count: trainees.length,
-      trainees: trainees
+      trainees: trainees,
     });
   } catch (error) {
     console.error("Error in getCoachTrainees:", error);
@@ -180,33 +181,35 @@ const forgotPassword = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     user.otp = otp;
     user.otpExpires = otpExpires;
     await user.save();
- 
+
     const message = `Hello,\n\nYour password reset OTP code is: ${otp}\nThis code is valid for 10 minutes only.\n\nIf you did not request this reset, please ignore this email.`;
 
     try {
       await sendEmail({
         email: user.email,
         subject: "Password Reset - Gym System",
-        message: message
+        message: message,
       });
-      
-      res.status(200).json({ message: "OTP code sent to your email successfully" });
+
+      res
+        .status(200)
+        .json({ message: "OTP code sent to your email successfully" });
     } catch (error) {
       user.otp = undefined;
       user.otpExpires = undefined;
       await user.save();
-      
-      console.error("Email Error:", error);
-      return res.status(500).json({ message: "Error sending email, please try again later" });
-    }
-    
 
+      console.error("Email Error:", error);
+      return res
+        .status(500)
+        .json({ message: "Error sending email, please try again later" });
+    }
   } catch (error) {
     console.error("Error in forgotPassword:", error);
     res.status(500).json({ message: "Server error" });
@@ -249,5 +252,5 @@ module.exports = {
   getCoachTrainees,
   resetPassword,
   forgotPassword,
-  logoutUser
+  logoutUser,
 };
