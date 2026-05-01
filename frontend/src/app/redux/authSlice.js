@@ -7,7 +7,6 @@ const getUserFromStorage = () => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   }
-
   return null;
 };
 
@@ -20,9 +19,8 @@ const authSlice = createSlice({
   initialState,
 
   reducers: {
-    setReducers: (state, action) => {
+    setUser: (state, action) => {
       state.user = action.payload;
-
       localStorage.setItem("user", JSON.stringify(action.payload));
     },
 
@@ -33,6 +31,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setReducers, logout } = authSlice.actions;
+export const { setUser, logout } = authSlice.actions;
 
 export default authSlice.reducer;
