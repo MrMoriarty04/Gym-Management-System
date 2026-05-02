@@ -1,11 +1,13 @@
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './slices/authSlice'; 
-import workoutReducer from './slices/workoutSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./authSlice";
+import workoutReducer from "./workoutSlice";
+import dietReducer from "./dietSlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
-    workout:workoutReducer
+    workout: workoutReducer,
+    diet: dietReducer,
   },
 });
 
-export default store; 
+export default store;

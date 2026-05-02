@@ -6,20 +6,19 @@ const otpTokenSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
-    codeHash: {
+    otp: {
       type: String,
       required: true,
     },
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
     purpose: {
       type: String,
-      default: "verify-account",
+      enum: ["verify-account", "reset-password"],
+      required: true,
     },
   },
   { timestamps: true },

@@ -1,10 +1,13 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const sendEmail = require("../utils/sendEmail");
-
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+const { sendMail, sendOtpEmail } = require("../services/mailService");
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id.toString(), role: user.role }, 
+    process.env.JWT_SECRET, 
+    { expiresIn: "30d" }
+  );
 };
 
 const cookieOptions = {
@@ -37,7 +40,7 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
-      const token = generateToken(user._id);
+      const token = generateToken(user);
       res.cookie("jwt", token, cookieOptions);
 
       res.status(201).json({
@@ -69,7 +72,7 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const token = generateToken(user._id);
+      const token = generateToken(user);
       res.cookie("jwt", token, cookieOptions);
 
       res.status(200).json({
@@ -154,16 +157,18 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+const TraineeProfile = require("../models/TraineeProfile");
+
 const getCoachTrainees = async (req, res) => {
   try {
-    const trainees = await User.find({
-      coachId: req.user.id,
-      role: "trainee",
-    }).select("-password");
+    const coachId = req.user.id;
+
+    const traineesProfiles = await TraineeProfile.find({ assignedCoach: coachId })
+      .populate("user", "-password"); 
 
     res.status(200).json({
-      count: trainees.length,
-      trainees: trainees,
+      count: traineesProfiles.length,
+      trainees: traineesProfiles.map(profile => profile.user), 
     });
   } catch (error) {
     console.error("Error in getCoachTrainees:", error);
@@ -191,12 +196,11 @@ const forgotPassword = async (req, res) => {
     const message = `Hello,\n\nYour password reset OTP code is: ${otp}\nThis code is valid for 10 minutes only.\n\nIf you did not request this reset, please ignore this email.`;
 
     try {
-      await sendEmail({
-        email: user.email,
-        subject: "Password Reset - Gym System",
-        message: message,
+      await sendOtpEmail({
+        to: user.email,
+        otp: otp,
+        expiresInMinutes: 10,
       });
-
       res
         .status(200)
         .json({ message: "OTP code sent to your email successfully" });

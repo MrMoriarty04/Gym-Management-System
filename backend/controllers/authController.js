@@ -20,22 +20,22 @@ const createJwt = (user) => {
 const requestOtp = async (req, res) => {
   try {
     const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
-    }
+    if (!email) return res.status(400).json({ message: "Email is required" });
 
     const user = await User.findOne({
       email: String(email).toLowerCase().trim(),
     });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await OtpToken.deleteMany({ userId: user._id, purpose: "verify-account" });
 
     const otp = generateOtpCode();
-    user.otp = otp;
-    user.otpExpires = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
-    await user.save();
+    await OtpToken.create({
+      userId: user._id,
+      otp: otp,
+      expiresAt: new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000),
+      purpose: "verify-account",
+    });
 
     await sendOtpEmail({
       to: user.email,
@@ -43,9 +43,7 @@ const requestOtp = async (req, res) => {
       expiresInMinutes: OTP_EXPIRY_MINUTES,
     });
 
-    return res.status(200).json({
-      message: "OTP sent successfully",
-    });
+    return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
     console.error("requestOtp error:", error);
     return res.status(500).json({ message: "Failed to send OTP" });
@@ -55,33 +53,30 @@ const requestOtp = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
-
-    if (!email || !otp) {
+    if (!email || !otp)
       return res.status(400).json({ message: "Email and OTP are required" });
-    }
 
     const user = await User.findOne({
       email: String(email).toLowerCase().trim(),
     });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.otp || !user.otpExpires || user.otpExpires < new Date()) {
-      return res.status(400).json({ message: "OTP is invalid or expired" });
-    }
+    const otpRecord = await OtpToken.findOne({
+      userId: user._id,
+      otp: String(otp).trim(),
+      purpose: "verify-account",
+    });
 
-    if (String(user.otp).trim() !== String(otp).trim()) {
+    if (!otpRecord) {
       return res.status(400).json({ message: "OTP is invalid or expired" });
     }
 
     user.isVerified = true;
-    user.otp = undefined;
-    user.otpExpires = undefined;
     await user.save();
 
-    const authToken = createJwt(user);
+    await OtpToken.findByIdAndDelete(otpRecord._id);
 
+    const authToken = createJwt(user);
     res.cookie("jwt", authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== "development",
