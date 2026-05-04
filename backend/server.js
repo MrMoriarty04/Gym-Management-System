@@ -31,7 +31,7 @@ app.use('/api/coach', coachRoutes);
 
 const traineeRoutes = require('./routes/traineeRoutes');
 app.use('/api/trainee', traineeRoutes);
-
+app.use('/api/diet', require('./routes/dietRoutes'));
 
 const PORT = process.env.PORT || 5000;
 
