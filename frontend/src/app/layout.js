@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "./redux/StoreProvider";
+import { ChakraProvider } from "@chakra-ui/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +22,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <ChakraProvider>{children}</ChakraProvider>
+        </StoreProvider>
       </body>
     </html>
   );
