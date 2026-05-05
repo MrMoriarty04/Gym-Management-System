@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/authSlice";
+import ChakraProviders from "../ChakraProviders";
 import api from "../utils/axios";
 import {
   Box,
@@ -21,6 +24,7 @@ export default function VerifyOtp() {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  const dispatch = useDispatch();
   const toast = useToast();
 
   const searchParams = useSearchParams();
@@ -43,10 +47,14 @@ export default function VerifyOtp() {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/users/verify-otp", {
+      const response = await api.post("/auth/verify-otp", {
         email: email,
         otp: otp,
       });
+
+      if (response.data?.user) {
+        dispatch(setUser(response.data.user));
+      }
 
       toast({
         title: "System Access Granted",
@@ -57,7 +65,7 @@ export default function VerifyOtp() {
         position: "top",
       });
 
-      router.push("/login");
+      router.push("/");
     } catch (error) {
       toast({
         title: "Verification Failed",
@@ -85,91 +93,93 @@ export default function VerifyOtp() {
   }
 
   return (
-    <Flex
-      minH="100vh"
-      align="center"
-      justify="center"
-      bg="#121212"
-      direction="column"
-      p={4}
-    >
-      <Heading color="#ccff00" fontSize="4xl" letterSpacing="widest" mb={8}>
-        IRON_PULSE
-      </Heading>
-
-      <Box
-        p={8}
-        w="100%"
-        maxWidth="400px"
-        borderWidth={1}
-        borderColor="#2a2a2a"
-        borderRadius={8}
-        bg="#1a1a1a"
-        borderTop="4px solid #ccff00"
+    <ChakraProviders>
+      <Flex
+        minH="100vh"
+        align="center"
+        justify="center"
+        bg="#121212"
+        direction="column"
+        p={4}
       >
-        <form onSubmit={handleVerify}>
-          <VStack spacing={6}>
-            <VStack spacing={1} align="center" w="100%">
-              <Text color="white" fontSize="sm" fontWeight="bold">
-                VERIFY OPERATIVE STATUS
-              </Text>
-              <Text color="gray.500" fontSize="xs" textAlign="center">
-                Enter the sequence dispatched to: <br />
-                <span style={{ color: "#ccff00" }}>{email}</span>
-              </Text>
-            </VStack>
+        <Heading color="#ccff00" fontSize="4xl" letterSpacing="widest" mb={8}>
+          IRON_PULSE
+        </Heading>
 
-            <Box w="100%">
-              <Flex align="center" mb={2}>
-                <Icon as={FiKey} color="gray.400" mr={2} />
-                <Text
-                  color="gray.300"
-                  fontSize="xs"
-                  fontWeight="bold"
-                  letterSpacing="wide"
-                >
-                  SECURITY SEQUENCE (OTP)
+        <Box
+          p={8}
+          w="100%"
+          maxWidth="400px"
+          borderWidth={1}
+          borderColor="#2a2a2a"
+          borderRadius={8}
+          bg="#1a1a1a"
+          borderTop="4px solid #ccff00"
+        >
+          <form onSubmit={handleVerify}>
+            <VStack spacing={6}>
+              <VStack spacing={1} align="center" w="100%">
+                <Text color="white" fontSize="sm" fontWeight="bold">
+                  VERIFY OPERATIVE STATUS
                 </Text>
-              </Flex>
-              <Input
-                type="text"
-                placeholder="Enter verification code"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                required
-                bg="#0f0f0f"
-                border="1px solid #333"
-                color="white"
-                textAlign="center"
-                letterSpacing="widest"
-                fontSize="lg"
-                _placeholder={{
-                  color: "gray.600",
-                  fontSize: "sm",
-                  letterSpacing: "normal",
-                }}
-                _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
-              />
-            </Box>
+                <Text color="gray.500" fontSize="xs" textAlign="center">
+                  Enter the sequence dispatched to: <br />
+                  <span style={{ color: "#ccff00" }}>{email}</span>
+                </Text>
+              </VStack>
 
-            <Button
-              type="submit"
-              w="100%"
-              bg="#ccff00"
-              color="black"
-              borderRadius="sm"
-              fontWeight="bold"
-              mt={2}
-              isLoading={isLoading}
-              loadingText="VERIFYING..."
-              rightIcon={<FiArrowRight />}
-              _hover={{ bg: "#b3e600" }}
-            >
-              CONFIRM SEQUENCE
-            </Button>
-          </VStack>
-        </form>
-      </Box>
-    </Flex>
+              <Box w="100%">
+                <Flex align="center" mb={2}>
+                  <Icon as={FiKey} color="gray.400" mr={2} />
+                  <Text
+                    color="gray.300"
+                    fontSize="xs"
+                    fontWeight="bold"
+                    letterSpacing="wide"
+                  >
+                    SECURITY SEQUENCE (OTP)
+                  </Text>
+                </Flex>
+                <Input
+                  type="text"
+                  placeholder="Enter verification code"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                  bg="#0f0f0f"
+                  border="1px solid #333"
+                  color="white"
+                  textAlign="center"
+                  letterSpacing="widest"
+                  fontSize="lg"
+                  _placeholder={{
+                    color: "gray.600",
+                    fontSize: "sm",
+                    letterSpacing: "normal",
+                  }}
+                  _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
+                />
+              </Box>
+
+              <Button
+                type="submit"
+                w="100%"
+                bg="#ccff00"
+                color="black"
+                borderRadius="sm"
+                fontWeight="bold"
+                mt={2}
+                isLoading={isLoading}
+                loadingText="VERIFYING..."
+                rightIcon={<FiArrowRight />}
+                _hover={{ bg: "#b3e600" }}
+              >
+                CONFIRM SEQUENCE
+              </Button>
+            </VStack>
+          </form>
+        </Box>
+      </Flex>
+    </ChakraProviders>
   );
 }
