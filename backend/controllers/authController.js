@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
+const OtpToken = require("../models/OtpToken");
 const { sendOtpEmail } = require("../services/mailService");
 
 const OTP_EXPIRY_MINUTES = 10;
