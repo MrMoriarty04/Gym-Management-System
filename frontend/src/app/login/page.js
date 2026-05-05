@@ -44,15 +44,7 @@ export default function Login() {
         position: "top",
       });
 
-      const userRole = response.data.role;
-
-      if (userRole === "admin") {
-        router.push("/adminDashboard");
-      } else if (userRole === "coach") {
-        router.push("/coachDashboard");
-      } else {
-        router.push("/traineeDashboard");
-      }
+      router.push("/");
     } catch (error) {
       toast({
         title: "Access Denied",
@@ -161,7 +153,7 @@ export default function Login() {
           </form>
 
           <Text textAlign="center" color="gray.500" fontSize="xs" mt={4}>
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link color="#ccff00" fontWeight="bold" href="/register">
               Sign up
             </Link>

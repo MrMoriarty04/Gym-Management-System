@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/authSlice";
 import api from "../utils/axios";
 import {
   Box,
@@ -21,6 +23,7 @@ export default function VerifyOtp() {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  const dispatch = useDispatch();
   const toast = useToast();
 
   const searchParams = useSearchParams();
@@ -43,10 +46,14 @@ export default function VerifyOtp() {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/users/verify-otp", {
+      const response = await api.post("/auth/verify-otp", {
         email: email,
         otp: otp,
       });
+
+      if (response.data?.user) {
+        dispatch(setUser(response.data.user));
+      }
 
       toast({
         title: "System Access Granted",
@@ -57,7 +64,7 @@ export default function VerifyOtp() {
         position: "top",
       });
 
-      router.push("/login");
+      router.push("/");
     } catch (error) {
       toast({
         title: "Verification Failed",

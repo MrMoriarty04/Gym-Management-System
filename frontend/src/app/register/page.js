@@ -56,10 +56,14 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/users/register", {
+      await api.post("/users/register", {
         name,
         email,
         password,
+      });
+
+      await api.post("/auth/request-otp", {
+        email,
       });
 
       toast({
