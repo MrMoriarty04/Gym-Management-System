@@ -1,7 +1,7 @@
 import { Inter, Lexend } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "./redux/StoreProvider";
-
+import ChakraProviders from "./ChakraProviders";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -21,7 +21,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${lexend.variable}`}>
       <body>
+        <ChakraProviders>
         <StoreProvider>{children}</StoreProvider>
+        </ChakraProviders>
       </body>
     </html>
   );
