@@ -38,6 +38,8 @@ app.use("/api/coach", coachRoutes);
 const traineeRoutes = require("./routes/traineeRoutes");
 app.use("/api/trainee", traineeRoutes);
 
+const sessionRoutes = require("./routes/sessionRoutes");
+app.use("/api/sessions", sessionRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
