@@ -21,6 +21,8 @@ app.use('/api/workouts', workoutRoutes);
 
 
 
+const sessionRoutes = require("./routes/sessionRoutes");
+app.use("/api/sessions", sessionRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
