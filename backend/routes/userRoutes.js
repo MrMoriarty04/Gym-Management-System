@@ -11,13 +11,14 @@ const {
   forgotPassword,
   resetPassword,
   logoutUser,
+  changePassword
 } = require("../controllers/userController");
 const { protect, authorize } = require("../middlewares/authMiddleware");
 
 router.post("/register", registerUser);
 
 router.post("/login", loginUser);
-
+router.put("/change-password", protect, changePassword);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 //!should be above router.get('/:id'

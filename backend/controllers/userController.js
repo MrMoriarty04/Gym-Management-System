@@ -1,7 +1,10 @@
 const User = require("../models/User");
+const Subscription = require("../models/Subscription"); 
+const TraineeProfile = require("../models/TraineeProfile");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendMail, sendOtpEmail } = require("../services/mailService");
+
 const generateToken = (user) => {
   return jwt.sign(
     { id: user._id.toString(), role: user.role }, 
@@ -20,9 +23,11 @@ const cookieOptions = {
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    
+    const planFromCookie = req.cookies.pendingPlan; 
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "please fill all the blanks " });
+      return res.status(400).json({ message: "please fill all the blanks" });
     }
 
     const userExists = await User.findOne({ email });
@@ -32,6 +37,7 @@ const registerUser = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    
     const user = await User.create({
       name,
       password: hashedPassword,
@@ -40,6 +46,19 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+      if (planFromCookie) {
+        await Subscription.create({
+          user: user._id,
+          planType: Number(planFromCookie),
+          paymentStatus: "paid", 
+          startDate: new Date(),
+          endDate: new Date(Date.now() + Number(planFromCookie) * 30 * 24 * 60 * 60 * 1000),
+          isActive: true
+        });
+        
+        res.clearCookie("pendingPlan");
+      }
+
       const token = generateToken(user);
       res.cookie("jwt", token, cookieOptions);
 
@@ -64,9 +83,7 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Please provide email and password" });
+      return res.status(400).json({ message: "Please provide email and password" });
     }
 
     const user = await User.findOne({ email });
@@ -90,6 +107,7 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 const getUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -105,6 +123,7 @@ const getUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 const logoutUser = (req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
@@ -132,9 +151,7 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res
-      .status(200)
-      .json({ message: "User updated successfully", user: updatedUser });
+    res.status(200).json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -157,7 +174,6 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-const TraineeProfile = require("../models/TraineeProfile");
 
 const getCoachTrainees = async (req, res) => {
   try {
@@ -186,14 +202,11 @@ const forgotPassword = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     user.otp = otp;
     user.otpExpires = otpExpires;
     await user.save();
-
-    const message = `Hello,\n\nYour password reset OTP code is: ${otp}\nThis code is valid for 10 minutes only.\n\nIf you did not request this reset, please ignore this email.`;
 
     try {
       await sendOtpEmail({
@@ -201,18 +214,14 @@ const forgotPassword = async (req, res) => {
         otp: otp,
         expiresInMinutes: 10,
       });
-      res
-        .status(200)
-        .json({ message: "OTP code sent to your email successfully" });
+      res.status(200).json({ message: "OTP code sent to your email successfully" });
     } catch (error) {
       user.otp = undefined;
       user.otpExpires = undefined;
       await user.save();
 
       console.error("Email Error:", error);
-      return res
-        .status(500)
-        .json({ message: "Error sending email, please try again later" });
+      return res.status(500).json({ message: "Error sending email, please try again later" });
     }
   } catch (error) {
     console.error("Error in forgotPassword:", error);
@@ -247,6 +256,27 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -257,4 +287,5 @@ module.exports = {
   resetPassword,
   forgotPassword,
   logoutUser,
+  changePassword
 };
