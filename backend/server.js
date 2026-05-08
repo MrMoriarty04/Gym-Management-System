@@ -42,6 +42,9 @@ const sessionRoutes = require("./routes/sessionRoutes");
 app.use("/api/sessions", sessionRoutes);
 const PORT = process.env.PORT || 5000;
 
+const dietRoutes = require("./routes/dietRoutes");
+
+app.use("/api/diet", dietRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on port: http://localhost:${PORT}`);
 });
