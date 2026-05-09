@@ -3,8 +3,8 @@ const router = express.Router();
 
 const { protect } = require("../middlewares/authMiddleware"); 
 
-const { getTodayDietSummary } = require("../controllers/dietController");
+const { getTodayDietSummary ,logMealWithAI  } = require("../controllers/dietController");
 
 router.get("/summary", protect, getTodayDietSummary);
-
-module.exports = router;
+router.post('/log-meal', protect, logMealWithAI)
+;module.exports = router;

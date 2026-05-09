@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const parseJsonSafely = (text) => {
   try {
     return JSON.parse(text);
@@ -6,83 +8,65 @@ const parseJsonSafely = (text) => {
   }
 };
 
-const buildPrompt = (userPrompt) => {
+const buildMealPrompt = (mealText) => {
   return [
     'You are a fitness nutrition assistant.',
-    'Given available ingredients, return a practical recipe and nutrition estimate.',
-    'Respond ONLY as valid JSON with this shape:',
+    'Given a text describing what a user ate, estimate the calories and macronutrients.',
+    'Respond ONLY as valid JSON with this exact shape:',
     '{',
-    '  "recipeName": "string",',
-    '  "ingredients": ["string"],',
-    '  "instructions": ["string"],',
-    '  "estimatedCalories": number,',
-    '  "estimatedMacros": { "protein": number, "carbs": number, "fat": number },',
-    '  "budgetTips": ["string"]',
+    '  "mealName": "string",',
+    '  "ingredients": "string",',
+    '  "calories": number,',
+    '  "protein": number,',
+    '  "carbs": number,',
+    '  "fat": number',
     '}',
     '',
-    `User prompt: ${userPrompt}`,
+    `User ate: ${mealText}`,
   ].join('\n');
 };
 
-const generateRecipeFromPrompt = async (userPrompt) => {
-  if (!process.env.AI_API_KEY) {
-    throw new Error('AI_API_KEY is not configured');
-  }
+const analyzeMealLog = async (mealText) => {
+  const apiKey = process.env.GROQ_API_KEY;
 
-  const endpoint = process.env.AI_API_URL || 'https://api.openai.com/v1/chat/completions';
-  const model = process.env.AI_MODEL || 'gpt-4o-mini';
+  if (!apiKey) throw new Error('GROQ_API_KEY is not configured in .env');
+
+  const endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+  const model = 'llama-3.1-8b-instant'; 
 
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.AI_API_KEY}`,
+      'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model,
-      temperature: 0.4,
+      model: model,
+      temperature: 0.1, 
       messages: [
-        {
-          role: 'system',
-          content: 'You produce safe, concise, nutrition-focused recipe suggestions.',
-        },
-        {
-          role: 'user',
-          content: buildPrompt(userPrompt),
-        },
+        { role: 'system', content: 'You are a precise nutrition calculator. You output ONLY valid JSON without any markdown formatting.' },
+        { role: 'user', content: buildMealPrompt(mealText) },
       ],
     }),
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`AI API request failed (${response.status}): ${errorText}`);
-  }
+  if (!response.ok) throw new Error(`Groq API request failed: ${await response.text()}`);
 
   const data = await response.json();
-  const rawText = data.choices && data.choices[0] && data.choices[0].message
-    ? data.choices[0].message.content
-    : null;
+  let rawText = data.choices?.[0]?.message?.content || null;
 
-  if (!rawText) {
-    throw new Error('AI API returned an empty response');
-  }
+  if (!rawText) throw new Error('Groq returned an empty response');
 
-  const parsed = parseJsonSafely(rawText);
-  if (parsed) {
-    return parsed;
-  }
+  rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
-  return {
-    recipeName: 'AI Suggested Recipe',
-    ingredients: [],
-    instructions: [rawText],
-    estimatedCalories: null,
-    estimatedMacros: { protein: null, carbs: null, fat: null },
-    budgetTips: [],
-  };
+  return parseJsonSafely(rawText);
+};
+
+const generateRecipeFromPrompt = async () => {
+  return {}; 
 };
 
 module.exports = {
   generateRecipeFromPrompt,
+  analyzeMealLog,
 };
