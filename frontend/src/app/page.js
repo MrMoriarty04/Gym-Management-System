@@ -1,6 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 import NextLink from "next/link";
+import { getDashboardPath } from "./utils/authRedirect";
 import {
   Box,
   Button,
@@ -20,6 +24,19 @@ const metrics = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const user = useSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    if (user) {
+      router.replace(getDashboardPath(user.role));
+    }
+  }, [user, router]);
+
+  if (user) {
+    return null;
+  }
+
   return (
     <MarketingShell>
       <Container maxW="6xl">
@@ -62,7 +79,7 @@ export default function Home() {
             <HStack spacing={4} pt={2} flexWrap="wrap">
               <Button
                 as={NextLink}
-                href="/register"
+                href="/account-type"
                 bg="#CCFF00"
                 color="#0A0A0A"
                 borderRadius="999px"

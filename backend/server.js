@@ -40,6 +40,10 @@ app.use("/api/trainee", traineeRoutes);
 
 const sessionRoutes = require("./routes/sessionRoutes");
 app.use("/api/sessions", sessionRoutes);
+
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api/admin", adminRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 const dietRoutes = require("./routes/dietRoutes");

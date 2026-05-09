@@ -1,15 +1,14 @@
 const User = require("../models/User");
-const Subscription = require("../models/Subscription"); 
+const Subscription = require("../models/Subscription");
 const TraineeProfile = require("../models/TraineeProfile");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sendMail, sendOtpEmail } = require("../services/mailService");
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user._id.toString(), role: user.role }, 
-    process.env.JWT_SECRET, 
-    { expiresIn: "30d" }
+    { id: user._id.toString(), role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "30d" },
   );
 };
 
@@ -23,8 +22,8 @@ const cookieOptions = {
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    
-    const planFromCookie = req.cookies.pendingPlan; 
+
+    const planFromCookie = req.cookies.pendingPlan;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "please fill all the blanks" });
@@ -37,7 +36,7 @@ const registerUser = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    
+
     const user = await User.create({
       name,
       password: hashedPassword,
@@ -50,12 +49,14 @@ const registerUser = async (req, res) => {
         await Subscription.create({
           user: user._id,
           planType: Number(planFromCookie),
-          paymentStatus: "paid", 
+          paymentStatus: "paid",
           startDate: new Date(),
-          endDate: new Date(Date.now() + Number(planFromCookie) * 30 * 24 * 60 * 60 * 1000),
-          isActive: true
+          endDate: new Date(
+            Date.now() + Number(planFromCookie) * 30 * 24 * 60 * 60 * 1000,
+          ),
+          isActive: true,
         });
-        
+
         res.clearCookie("pendingPlan");
       }
 
@@ -63,10 +64,11 @@ const registerUser = async (req, res) => {
       res.cookie("jwt", token, cookieOptions);
 
       res.status(201).json({
-        _id: user.id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
+        isVerified: user.isVerified || false,
         message: "Account created and logged in successfully",
       });
     } else {
@@ -83,7 +85,9 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Please provide email and password" });
+      return res
+        .status(400)
+        .json({ message: "Please provide email and password" });
     }
 
     const user = await User.findOne({ email });
@@ -93,10 +97,11 @@ const loginUser = async (req, res) => {
       res.cookie("jwt", token, cookieOptions);
 
       res.status(200).json({
-        _id: user.id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
+        isVerified: user.isVerified || false,
         message: "Logged in successfully",
       });
     } else {
@@ -151,7 +156,9 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ message: "User updated successfully", user: updatedUser });
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
@@ -179,12 +186,13 @@ const getCoachTrainees = async (req, res) => {
   try {
     const coachId = req.user.id;
 
-    const traineesProfiles = await TraineeProfile.find({ assignedCoach: coachId })
-      .populate("user", "-password"); 
+    const traineesProfiles = await TraineeProfile.find({
+      assignedCoach: coachId,
+    }).populate("user", "-password");
 
     res.status(200).json({
       count: traineesProfiles.length,
-      trainees: traineesProfiles.map(profile => profile.user), 
+      trainees: traineesProfiles.map((profile) => profile.user),
     });
   } catch (error) {
     console.error("Error in getCoachTrainees:", error);
@@ -201,28 +209,17 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = process.env.TEST_OTP || "123456";
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     user.otp = otp;
     user.otpExpires = otpExpires;
     await user.save();
 
-    try {
-      await sendOtpEmail({
-        to: user.email,
-        otp: otp,
-        expiresInMinutes: 10,
-      });
-      res.status(200).json({ message: "OTP code sent to your email successfully" });
-    } catch (error) {
-      user.otp = undefined;
-      user.otpExpires = undefined;
-      await user.save();
-
-      console.error("Email Error:", error);
-      return res.status(500).json({ message: "Error sending email, please try again later" });
-    }
+    res.status(200).json({
+      message: "OTP generated successfully",
+      testOtp: otp,
+    });
   } catch (error) {
     console.error("Error in forgotPassword:", error);
     res.status(500).json({ message: "Server error" });
@@ -287,5 +284,5 @@ module.exports = {
   resetPassword,
   forgotPassword,
   logoutUser,
-  changePassword
+  changePassword,
 };

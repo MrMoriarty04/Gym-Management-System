@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { setUser } from "../redux/authSlice";
@@ -20,16 +20,17 @@ import {
 
 import { FiKey, FiArrowRight } from "react-icons/fi";
 
-export default function VerifyOtp() {
-  const [otp, setOtp] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
+function VerifyOtpContent() {
   const router = useRouter();
   const dispatch = useDispatch();
   const toast = useToast();
-
   const searchParams = useSearchParams();
+
   const email = searchParams.get("email");
+  const initialOtp = searchParams.get("otp") || "";
+
+  const [otp, setOtp] = useState(initialOtp);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -161,6 +162,17 @@ export default function VerifyOtp() {
                   }}
                   _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
                 />
+                {initialOtp ? (
+                  <Text
+                    mt={3}
+                    color="#ccff00"
+                    fontSize="xs"
+                    textAlign="center"
+                    letterSpacing="0.16em"
+                  >
+                    Test OTP prefilled for local verification.
+                  </Text>
+                ) : null}
               </Box>
 
               <Button
@@ -183,5 +195,13 @@ export default function VerifyOtp() {
         </Box>
       </Flex>
     </ChakraProviders>
+  );
+}
+
+export default function VerifyOtp() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyOtpContent />
+    </Suspense>
   );
 }

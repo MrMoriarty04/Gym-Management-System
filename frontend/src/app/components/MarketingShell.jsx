@@ -85,7 +85,7 @@ export default function MarketingShell({ children }) {
 
               <Button
                 as={NextLink}
-                href="/register"
+                href="/account-type"
                 size="sm"
                 bg="#CCFF00"
                 color="#0A0A0A"

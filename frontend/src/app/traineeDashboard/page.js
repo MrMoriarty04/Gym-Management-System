@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import api from "../utils/axios";
+import { useAuthProtect } from "../hooks/useAuthProtect";
 import {
   Grid,
   GridItem,
@@ -15,13 +16,19 @@ import {
 import { FiPlay } from "react-icons/fi";
 
 export default function DashboardHome() {
+  const { user, isAuthorized } = useAuthProtect("trainee");
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [dashboardData, setDashboardData] = useState({
     workout: null,
     nutrition: { remainingCalories: 0 },
   });
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   useEffect(() => {
     let isMounted = true;

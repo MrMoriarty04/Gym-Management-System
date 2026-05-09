@@ -2,12 +2,12 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
 const OtpToken = require("../models/OtpToken");
-const { sendOtpEmail } = require("../services/mailService");
 
 const OTP_EXPIRY_MINUTES = 10;
+const TEST_OTP = process.env.TEST_OTP || "123456";
 
 const generateOtpCode = () => {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return TEST_OTP;
 };
 
 const createJwt = (user) => {
@@ -38,13 +38,10 @@ const requestOtp = async (req, res) => {
       purpose: "verify-account",
     });
 
-    await sendOtpEmail({
-      to: user.email,
-      otp,
-      expiresInMinutes: OTP_EXPIRY_MINUTES,
+    return res.status(200).json({
+      message: "OTP generated successfully",
+      testOtp: otp,
     });
-
-    return res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
     console.error("requestOtp error:", error);
     return res.status(500).json({ message: "Failed to send OTP" });
@@ -89,7 +86,8 @@ const verifyOtp = async (req, res) => {
       message: "OTP verified successfully",
       token: authToken,
       user: {
-        id: user._id,
+        id: user._id.toString(),
+        name: user.name,
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,

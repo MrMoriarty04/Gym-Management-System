@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import ChakraProviders from "../ChakraProviders";
 import api from "../utils/axios";
 import {
@@ -18,7 +18,17 @@ import {
 
 import { FiUser, FiMail, FiKey, FiArrowRight, FiShield } from "react-icons/fi";
 
-export default function Register() {
+const normalizeRole = (value) => {
+  const role = String(value || "trainee").toLowerCase();
+
+  if (role === "admin" || role === "coach" || role === "trainee") {
+    return role;
+  }
+
+  return "trainee";
+};
+
+function RegisterContent() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +37,9 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const toast = useToast();
+  const selectedRole = normalizeRole(searchParams.get("role"));
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -61,23 +73,28 @@ export default function Register() {
         name,
         email,
         password,
+        role: selectedRole,
       });
 
-      await api.post("/auth/request-otp", {
+      const otpResponse = await api.post("/auth/request-otp", {
         email,
       });
 
+      const testOtp = otpResponse.data?.testOtp;
+
       toast({
         title: "Registration Successful",
-        description:
-          "An OTP has been dispatched to your email. Please verify your operative status.",
+        description: testOtp
+          ? `Testing OTP generated: ${testOtp}`
+          : "An OTP has been dispatched to your email. Please verify your operative status.",
         status: "success",
         duration: 5000,
         isClosable: true,
         position: "top",
       });
 
-      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+      const otpQuery = testOtp ? `&otp=${encodeURIComponent(testOtp)}` : "";
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}${otpQuery}`);
     } catch (error) {
       toast({
         title: "Creation Failed",
@@ -107,6 +124,24 @@ export default function Register() {
         <Heading color="#ccff00" fontSize="4xl" letterSpacing="widest" mb={8}>
           IRON_PULSE
         </Heading>
+
+        <Box
+          mb={5}
+          px={4}
+          py={2}
+          borderRadius="full"
+          border="1px solid rgba(204,255,0,0.18)"
+          bg="rgba(204,255,0,0.06)"
+        >
+          <Text
+            color="gray.300"
+            fontSize="xs"
+            letterSpacing="0.18em"
+            textTransform="uppercase"
+          >
+            Creating a {selectedRole} account
+          </Text>
+        </Box>
 
         <Box
           p={8}
@@ -261,5 +296,13 @@ export default function Register() {
         </Text>
       </Flex>
     </ChakraProviders>
+  );
+}
+
+export default function Register() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterContent />
+    </Suspense>
   );
 }

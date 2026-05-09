@@ -40,6 +40,30 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    if (!email || !email.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter your email.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+
+    if (!password || !password.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter your password.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+
     try {
       const response = await api.post("/users/login", { email, password });
       const loggedInUser = response.data;
@@ -165,7 +189,7 @@ export default function Login() {
 
             <Text textAlign="center" color="gray.500" fontSize="xs" mt={4}>
               Don&apos;t have an account?{" "}
-              <Link color="#ccff00" fontWeight="bold" href="/register">
+              <Link color="#ccff00" fontWeight="bold" href="/account-type">
                 Sign up
               </Link>
             </Text>

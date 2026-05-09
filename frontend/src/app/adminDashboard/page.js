@@ -1,51 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import { Box, Center, Heading, Text } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import ChakraProviders from "../ChakraProviders";
-import { getDashboardPath } from "../utils/authRedirect";
+import { useAuthProtect } from "../hooks/useAuthProtect";
+import AdminDashboardView from "./components/AdminDashboardLive";
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
-  const user = useSelector((state) => state.auth.user);
+  const { user, isAuthorized } = useAuthProtect("admin");
 
-  useEffect(() => {
-    if (!user) {
-      router.replace("/login");
-      return;
-    }
-
-    if (String(user.role || "").toLowerCase() !== "admin") {
-      router.replace(getDashboardPath(user.role));
-    }
-  }, [user, router]);
-
-  if (!user || String(user.role || "").toLowerCase() !== "admin") {
+  if (!isAuthorized) {
     return null;
   }
 
   return (
     <ChakraProviders>
-      <Center minH="100vh" bg="#121212" p={6}>
-        <Box
-          w="100%"
-          maxW="720px"
-          borderWidth={1}
-          borderColor="#2a2a2a"
-          borderRadius="xl"
-          p={8}
-          bg="#1a1a1a"
-        >
-          <Heading color="#ccff00" size="lg" mb={3}>
-            Admin Dashboard
-          </Heading>
-          <Text color="gray.300">
-            Your login is valid. This is your role-specific dashboard route.
-          </Text>
-        </Box>
-      </Center>
+      <Box minH="100vh" bg="#131313">
+        <AdminDashboardView />
+      </Box>
     </ChakraProviders>
   );
 }
