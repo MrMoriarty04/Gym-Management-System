@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../redux/authSlice";
 import ChakraProviders from "../ChakraProviders";
 import api from "../utils/axios";
+import { getDashboardPath } from "../utils/authRedirect";
 
 import {
   Box,
@@ -28,14 +29,22 @@ export default function Login() {
   const router = useRouter();
   const dispatch = useDispatch();
   const toast = useToast();
+  const user = useSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    if (user) {
+      router.replace(getDashboardPath(user.role));
+    }
+  }, [user, router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       const response = await api.post("/users/login", { email, password });
+      const loggedInUser = response.data;
 
-      dispatch(setUser(response.data));
+      dispatch(setUser(loggedInUser));
 
       toast({
         title: "Session Initialized.",
@@ -45,7 +54,7 @@ export default function Login() {
         position: "top",
       });
 
-      router.push("/");
+      router.replace(getDashboardPath(loggedInUser?.role));
     } catch (error) {
       toast({
         title: "Access Denied",

@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../redux/authSlice";
 import ChakraProviders from "../ChakraProviders";
 import api from "../utils/axios";
+import { getDashboardPath } from "../utils/authRedirect";
 import {
   Box,
   Button,
@@ -52,8 +53,9 @@ export default function VerifyOtp() {
         otp: otp,
       });
 
-      if (response.data?.user) {
-        dispatch(setUser(response.data.user));
+      const verifiedUser = response.data?.user;
+      if (verifiedUser) {
+        dispatch(setUser(verifiedUser));
       }
 
       toast({
@@ -65,7 +67,7 @@ export default function VerifyOtp() {
         position: "top",
       });
 
-      router.push("/");
+      router.replace(getDashboardPath(verifiedUser?.role));
     } catch (error) {
       toast({
         title: "Verification Failed",
