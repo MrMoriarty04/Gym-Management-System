@@ -2,9 +2,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
-import { Box, Flex, Text, VStack, Icon } from "@chakra-ui/react";
+import { Box, Flex, Text, VStack, Icon, Button } from "@chakra-ui/react";
 import Link from "next/link";
-import { FiHome, FiActivity, FiCalendar, FiSettings } from "react-icons/fi";
+import {
+  FiHome,
+  FiActivity,
+  FiCalendar,
+  FiSettings,
+  FiMessageCircle,
+} from "react-icons/fi";
 import { MdOutlineFoodBank } from "react-icons/md";
 import { getDashboardPath } from "../utils/authRedirect";
 
@@ -37,6 +43,11 @@ export default function TraineeLayout({ children }) {
     { name: "Workouts", icon: FiActivity, path: "/traineeDashboard/workouts" },
     { name: "Schedule", icon: FiCalendar, path: "/traineeDashboard/schedule" },
     { name: "Diet", icon: MdOutlineFoodBank, path: "/traineeDashboard/diet" },
+    {
+      name: "AI Coach",
+      icon: FiMessageCircle,
+      path: "/traineeDashboard/ai-coach",
+    },
     { name: "Settings", icon: FiSettings, path: "/traineeDashboard/settings" },
   ];
 
@@ -94,6 +105,20 @@ export default function TraineeLayout({ children }) {
             </Link>
           ))}
         </VStack>
+
+        <Box p={4} borderTop="1px solid #2a2a2a">
+          <Button
+            as={Link}
+            href="/traineeDashboard/ai-coach"
+            w="full"
+            bg="#ccff00"
+            color="black"
+            _hover={{ bg: "#b3e600" }}
+            leftIcon={<FiMessageCircle />}
+          >
+            Open AI Coach
+          </Button>
+        </Box>
       </Box>
 
       <Box flex="1" overflowY="auto" p={8}>

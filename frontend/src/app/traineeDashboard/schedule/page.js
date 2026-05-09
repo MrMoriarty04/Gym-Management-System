@@ -26,6 +26,7 @@ import {
   Input,
   useToast,
 } from "@chakra-ui/react";
+import Link from "next/link";
 import { FiClock, FiMapPin, FiMoreHorizontal } from "react-icons/fi";
 
 export default function SchedulePage() {
@@ -172,16 +173,16 @@ export default function SchedulePage() {
           </Text>
         </Box>
 
-        <Flex justify="space-between" align="flex-end" mb={8}>
-          <Box>
-            <Heading fontSize="4xl" mb={1}>
-              {monthName} {currentYear}
-            </Heading>
-            <Text color="gray.400" fontSize="sm">
-              Manage your training blocks and sessions.
-            </Text>
-          </Box>
-        </Flex>
+        <Button
+          as={Link}
+          href="#book-session"
+          bg="#ccff00"
+          color="black"
+          _hover={{ bg: "#b3e600" }}
+          fontWeight="bold"
+        >
+          BOOK SESSION
+        </Button>
       </Flex>
 
       <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={8}>
@@ -400,6 +401,8 @@ export default function SchedulePage() {
                 type="date"
                 min={new Date().toISOString().split("T")[0]}
                 border="1px solid #333"
+                color="white"
+                _placeholder={{ color: "gray.500" }}
                 _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
                 value={bookingData.date}
                 onChange={(e) =>
@@ -416,6 +419,8 @@ export default function SchedulePage() {
                 <Input
                   type="time"
                   border="1px solid #333"
+                  color="white"
+                  _placeholder={{ color: "gray.500" }}
                   _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
                   value={bookingData.startTime}
                   onChange={(e) =>
@@ -433,6 +438,8 @@ export default function SchedulePage() {
                 <Input
                   type="time"
                   border="1px solid #333"
+                  color="white"
+                  _placeholder={{ color: "gray.500" }}
                   _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
                   value={bookingData.endTime}
                   onChange={(e) =>
@@ -449,6 +456,8 @@ export default function SchedulePage() {
               <Input
                 placeholder="e.g. Main Floor Rack 3"
                 border="1px solid #333"
+                color="white"
+                _placeholder={{ color: "gray.500" }}
                 _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
                 value={bookingData.location}
                 onChange={(e) =>
@@ -485,6 +494,17 @@ export default function SchedulePage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <Button
+        mt={4}
+        variant="ghost"
+        color="#ccff00"
+        as={Link}
+        href="/traineeDashboard/ai-coach"
+        _hover={{ bg: "rgba(204, 255, 0, 0.08)" }}
+      >
+        Need guidance? Open AI Coach
+      </Button>
     </Box>
   );
 }

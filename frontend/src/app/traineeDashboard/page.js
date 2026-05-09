@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import api from "../utils/axios";
 import { useAuthProtect } from "../hooks/useAuthProtect";
 import {
@@ -12,8 +13,17 @@ import {
   IconButton,
   Spinner,
   Center,
+  SimpleGrid,
+  VStack,
 } from "@chakra-ui/react";
-import { FiPlay } from "react-icons/fi";
+import {
+  FiPlay,
+  FiCalendar,
+  FiActivity,
+  FiMessageCircle,
+  FiDroplet,
+  FiSettings,
+} from "react-icons/fi";
 
 export default function DashboardHome() {
   const { user, isAuthorized } = useAuthProtect("trainee");
@@ -25,10 +35,6 @@ export default function DashboardHome() {
     workout: null,
     nutrition: { remainingCalories: 0 },
   });
-
-  if (!isAuthorized) {
-    return null;
-  }
 
   useEffect(() => {
     let isMounted = true;
@@ -88,6 +94,10 @@ export default function DashboardHome() {
     };
   }, []);
 
+  if (!isAuthorized) {
+    return null;
+  }
+
   if (isLoading)
     return (
       <Center h="100%">
@@ -126,6 +136,9 @@ export default function DashboardHome() {
           mb={2}
         >
           ● DAILY BRIEFING
+        </Text>
+        <Text color="gray.500" fontSize="sm" mb={3}>
+          Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}.
         </Text>
         {dashboardData.workout ? (
           <>
@@ -188,22 +201,93 @@ export default function DashboardHome() {
 
       <GridItem
         colSpan={3}
-        bg="transparent"
+        bg="#1a1a1a"
         borderRadius="xl"
-        border="2px dashed #2a2a2a"
+        border="1px solid #2a2a2a"
         p={6}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
       >
-        <Text
-          color="gray.500"
-          fontWeight="bold"
-          cursor="pointer"
-          _hover={{ color: "#ccff00" }}
-        >
-          + Add Custom Widget
-        </Text>
+        <Flex justify="space-between" align="center" mb={5}>
+          <Box>
+            <Text
+              color="#ccff00"
+              fontSize="xs"
+              fontWeight="bold"
+              letterSpacing="widest"
+            >
+              QUICK ACTIONS
+            </Text>
+            <Text color="gray.400" fontSize="sm" mt={1}>
+              Jump to the most common trainee tasks.
+            </Text>
+          </Box>
+        </Flex>
+
+        <SimpleGrid columns={{ base: 1, md: 2, xl: 5 }} spacing={4}>
+          {[
+            {
+              label: "Workout",
+              href: "/traineeDashboard/workouts",
+              icon: FiActivity,
+              description: "Log reps and notes",
+            },
+            {
+              label: "Schedule",
+              href: "/traineeDashboard/schedule",
+              icon: FiCalendar,
+              description: "Book training time",
+            },
+            {
+              label: "Diet",
+              href: "/traineeDashboard/diet",
+              icon: FiDroplet,
+              description: "Track nutrition",
+            },
+            {
+              label: "AI Coach",
+              href: "/traineeDashboard/ai-coach",
+              icon: FiMessageCircle,
+              description: "Ask for a plan",
+            },
+            {
+              label: "Settings",
+              href: "/traineeDashboard/settings",
+              icon: FiSettings,
+              description: "Update profile",
+            },
+          ].map((item) => (
+            <Box
+              key={item.href}
+              as={Link}
+              href={item.href}
+              p={4}
+              borderRadius="lg"
+              border="1px solid #2a2a2a"
+              bg="#111"
+              _hover={{ borderColor: "#ccff00", transform: "translateY(-2px)" }}
+              transition="all 0.2s"
+            >
+              <VStack align="flex-start" spacing={2}>
+                <Flex
+                  w="42px"
+                  h="42px"
+                  align="center"
+                  justify="center"
+                  borderRadius="md"
+                  bg="rgba(204, 255, 0, 0.08)"
+                  color="#ccff00"
+                >
+                  <item.icon />
+                </Flex>
+                <Text fontWeight="bold" color="white">
+                  {item.label}
+                </Text>
+                <Text color="gray.500" fontSize="sm">
+                  {item.description}
+                </Text>
+              </VStack>
+            </Box>
+          ))}
+        </SimpleGrid>
       </GridItem>
     </Grid>
   );

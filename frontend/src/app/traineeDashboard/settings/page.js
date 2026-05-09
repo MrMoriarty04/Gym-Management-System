@@ -211,6 +211,8 @@ export default function SettingsPage() {
                   <Input
                     bg="#111"
                     border="1px solid #333"
+                    color="white"
+                    _placeholder={{ color: "gray.500" }}
                     value={profile.name}
                     onChange={(e) =>
                       setProfile({ ...profile, name: e.target.value })
@@ -225,6 +227,8 @@ export default function SettingsPage() {
                   <Input
                     bg="#111"
                     border="1px solid #333"
+                    color="white"
+                    _placeholder={{ color: "gray.500" }}
                     value={profile.email}
                     isReadOnly
                     opacity={0.6}
@@ -239,6 +243,8 @@ export default function SettingsPage() {
                     type="number"
                     bg="#111"
                     border="1px solid #333"
+                    color="white"
+                    _placeholder={{ color: "gray.500" }}
                     value={profile.height}
                     onChange={(e) =>
                       setProfile({ ...profile, height: e.target.value })
@@ -254,6 +260,8 @@ export default function SettingsPage() {
                     type="number"
                     bg="#111"
                     border="1px solid #333"
+                    color="white"
+                    _placeholder={{ color: "gray.500" }}
                     value={profile.weight}
                     onChange={(e) =>
                       setProfile({ ...profile, weight: e.target.value })
@@ -271,6 +279,8 @@ export default function SettingsPage() {
               <Textarea
                 bg="#111"
                 border="1px solid #333"
+                color="white"
+                _placeholder={{ color: "gray.500" }}
                 h="100px"
                 value={profile.bio}
                 onChange={(e) =>
@@ -320,6 +330,8 @@ export default function SettingsPage() {
                 bg="#111"
                 border="1px solid #333"
                 placeholder="••••••••"
+                color="white"
+                _placeholder={{ color: "gray.500" }}
                 _focus={{ borderColor: "#ccff00" }}
                 value={passwords.current}
                 onChange={(e) =>
@@ -336,6 +348,8 @@ export default function SettingsPage() {
                 bg="#111"
                 border="1px solid #333"
                 placeholder="••••••••"
+                color="white"
+                _placeholder={{ color: "gray.500" }}
                 _focus={{ borderColor: "#ccff00" }}
                 value={passwords.new}
                 onChange={(e) =>
@@ -352,6 +366,8 @@ export default function SettingsPage() {
                 bg="#111"
                 border="1px solid #333"
                 placeholder="••••••••"
+                color="white"
+                _placeholder={{ color: "gray.500" }}
                 _focus={{ borderColor: "#ccff00" }}
                 value={passwords.confirm}
                 onChange={(e) =>

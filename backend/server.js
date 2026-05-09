@@ -5,6 +5,9 @@ const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const app = express();
 
+const { protect, authorize } = require("./middlewares/authMiddleware");
+const { chatWithAI } = require("./controllers/aiController");
+
 connectDB();
 
 app.use(cookieParser());
@@ -22,6 +25,12 @@ app.use(
 );
 
 app.use(express.json());
+
+app.get("/api/ai/ping", (_req, res) => {
+  res.status(200).json({ ok: true });
+});
+
+app.post("/api/ai/chat", protect, authorize("trainee"), chatWithAI);
 
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);
@@ -43,6 +52,9 @@ app.use("/api/sessions", sessionRoutes);
 
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
+
+const aiRoutes = require("./routes/aiRoutes");
+app.use("/api/ai", aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 
