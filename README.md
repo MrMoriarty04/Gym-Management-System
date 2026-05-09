@@ -141,5 +141,3 @@ The trainee AI coach screen is available in the trainee dashboard. It uses the b
 ## License
 
 No license has been specified for this project.
-
-# Gym-Management-System
