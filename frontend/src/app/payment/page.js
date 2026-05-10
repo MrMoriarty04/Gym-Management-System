@@ -32,7 +32,7 @@ function PaymentForm() {
   setLoading(true);
   
   setTimeout(() => {
-    document.cookie = `pendingPlan=${planParam}; path=/; max-age=3600; SameSite=Strict`;
+    document.cookie = `pendingPlan=${planParam}; path=/; max-age=3600;  sameSite: "none",`;
     
     setLoading(false);
     toast({ title: "Payment Successful!", status: "success" });

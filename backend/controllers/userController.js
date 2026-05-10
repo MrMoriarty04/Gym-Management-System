@@ -15,7 +15,7 @@ const generateToken = (user) => {
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV !== "development",
-  sameSite: "strict",
+   sameSite: "none",
   maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 
@@ -68,7 +68,7 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        sameSite: "none",
+        
         isVerified: user.isVerified || false,
         message: "Account created and logged in successfully",
       });
@@ -102,7 +102,7 @@ const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        sameSite: "none",
+      
         isVerified: user.isVerified || false,
         message: "Logged in successfully",
       });
@@ -134,7 +134,7 @@ const getUser = async (req, res) => {
 const logoutUser = (req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
-    sameSite: "none",
+   
     expires: new Date(0),
   });
 
