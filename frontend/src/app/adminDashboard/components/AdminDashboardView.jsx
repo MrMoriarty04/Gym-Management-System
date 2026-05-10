@@ -478,6 +478,7 @@ export default function AdminDashboardView() {
         bg="radial-gradient(circle, rgba(204, 255, 0, 0.12) 0%, rgba(204, 255, 0, 0.02) 52%, transparent 72%)"
         filter="blur(8px)"
         pointerEvents="none"
+        
       />
       <Box
         position="absolute"

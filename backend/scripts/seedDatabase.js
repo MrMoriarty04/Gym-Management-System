@@ -42,7 +42,6 @@ const runSeed = async () => {
   ];
 
   try {
-    // Clear all collections (non-transactional fallback for non-replica-set MongoDB)
     await OtpToken.deleteMany({});
     await Diet.deleteMany({});
     await DietPlan.deleteMany({});
