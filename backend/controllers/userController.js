@@ -68,6 +68,7 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        sameSite: "none",
         isVerified: user.isVerified || false,
         message: "Account created and logged in successfully",
       });
@@ -101,6 +102,7 @@ const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        sameSite: "none",
         isVerified: user.isVerified || false,
         message: "Logged in successfully",
       });
@@ -132,6 +134,7 @@ const getUser = async (req, res) => {
 const logoutUser = (req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
+    sameSite: "none",
     expires: new Date(0),
   });
 
