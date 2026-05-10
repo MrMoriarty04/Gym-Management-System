@@ -1,6 +1,5 @@
 "use client";
-import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";import { useRouter, useSearchParams } from "next/navigation";
 import api from "../utils/axios";
 import {
   Box,
@@ -39,7 +38,13 @@ function RegisterContent() {
   const searchParams = useSearchParams();
   const toast = useToast();
   const selectedRole = normalizeRole(searchParams.get("role"));
-
+useEffect(() => {
+    const hasPendingPlan = document.cookie.includes("pendingPlan=");
+    
+    if (!hasPendingPlan && selectedRole === "trainee") {
+      router.replace("/choose-plan"); 
+    }
+  }, [router, selectedRole]);
   const handleRegister = async (e) => {
     e.preventDefault();
 

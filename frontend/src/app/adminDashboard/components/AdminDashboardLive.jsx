@@ -1,5 +1,8 @@
 "use client";
-
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/authSlice"; 
+import { FiLogOut } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import {
   Badge,
@@ -928,7 +931,23 @@ export default function AdminDashboardLive() {
   const [paymentsLoading, setPaymentsLoading] = useState(false);
   const [paymentsError, setPaymentsError] = useState("");
   const toast = useToast();
+const router = useRouter();
+  const dispatch = useDispatch();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await api.post("/users/logout"); 
+    } catch (err) {
+      console.error("Logout error", err);
+    } finally {
+      dispatch(logout()); 
+      localStorage.removeItem("token"); 
+      toast({ title: "Logged out successfully", status: "success", duration: 2000 });
+      router.replace("/login"); 
+    }
+  };
   const loadDashboard = async () => {
     try {
       setLoading(true);
@@ -985,6 +1004,24 @@ export default function AdminDashboardLive() {
           isClosable: true,
         });
       }
+      const router = useRouter();
+  const dispatch = useDispatch();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // فنكشن تسجيل الخروج
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await api.post("/users/logout"); 
+    } catch (err) {
+      console.error("Logout error", err);
+    } finally {
+      dispatch(logout()); 
+      localStorage.removeItem("token"); 
+      toast({ title: "Logged out successfully", status: "success", duration: 2000 });
+      router.replace("/login"); 
+    }
+  };
     } finally {
       setUsersLoading(false);
     }
@@ -1264,7 +1301,38 @@ export default function AdminDashboardLive() {
             </Flex>
           </CardBody>
         </Card>
-
+<HStack spacing={3}>
+                  <Button
+                    bg="#ccff00"
+                    color="#111111"
+                    _hover={{ bg: "#d9ff39" }}
+                    leftIcon={<FiArrowUpRight />}
+                    onClick={loadDashboard}
+                  >
+                    Refresh data
+                  </Button>
+                  <Button
+                    variant="outline"
+                    borderColor="rgba(204,255,0,0.28)"
+                    color="#ccff00"
+                    _hover={{ bg: "rgba(204,255,0,0.08)" }}
+                    onClick={loadDashboard}
+                  >
+                    Review churn
+                  </Button>
+                  
+                  
+                  <Button
+                    bg="#ff4d4d"
+                    color="white"
+                    _hover={{ bg: "#cc0000" }}
+                    leftIcon={<FiLogOut />}
+                    isLoading={isLoggingOut}
+                    onClick={handleLogout}
+                  >
+                    Sign Out
+                  </Button>
+                </HStack>
         {loading ? (
           <Card
             bg="#171717"

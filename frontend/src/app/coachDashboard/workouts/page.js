@@ -219,34 +219,38 @@ export default function CoachWorkoutsPage() {
       ) : (
         <>
           <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-            <GridItem>
-              <FormControl>
-                <FormLabel color="gray.300">Trainee</FormLabel>
-                <Select
-                  value={formData.traineeId}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      traineeId: e.target.value,
-                    }))
-                  }
-                  bg="#1a1a1a"
-                  border="1px solid #2a2a2a"
-                  _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
-                >
-                  {trainees.map((entry) => (
-                    <option key={entry.user?._id} value={entry.user?._id}>
-                      {entry.user?.name || "Unknown trainee"}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-            </GridItem>
+           <GridItem>
+          <FormControl> 
+            <FormLabel color="gray.300">Trainee</FormLabel>
+            <Select
+              color="white"
+              colorScheme="gray"
+              value={formData.traineeId}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  traineeId: e.target.value,
+                }))
+              }
+              bg="#1a1a1a"
+              border="1px solid #2a2a2a"
+              _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
+              sx={{ option: { background: "#1a1a1a", color: "white" } }} 
+            >
+              <option value="" disabled>Select a trainee</option> 
+              {trainees.map((entry) => (
+                <option key={entry.user?._id} value={entry.user?._id}>
+                  {entry.user?.name || "Unknown trainee"}
+                </option>
+              ))}
+            </Select>
+          </FormControl>
+        </GridItem>
 
             <GridItem>
               <FormControl>
                 <FormLabel color="gray.300">Day of Week</FormLabel>
-                <Select
+                <Select color="white"
                   value={formData.dayOfWeek}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -254,6 +258,7 @@ export default function CoachWorkoutsPage() {
                       dayOfWeek: e.target.value,
                     }))
                   }
+                  sx={{ option: { background: "#1a1a1a", color: "white" } }} 
                   bg="#1a1a1a"
                   border="1px solid #2a2a2a"
                   _focus={{ borderColor: "#ccff00", boxShadow: "none" }}
@@ -302,7 +307,7 @@ export default function CoachWorkoutsPage() {
                       <FormLabel color="gray.400" fontSize="sm">
                         Exercise Name
                       </FormLabel>
-                      <Input
+                      <Input color="white"
                         value={exercise.exerciseName}
                         onChange={(e) =>
                           updateExercise(index, "exerciseName", e.target.value)
@@ -320,7 +325,7 @@ export default function CoachWorkoutsPage() {
                       <FormLabel color="gray.400" fontSize="sm">
                         Sets
                       </FormLabel>
-                      <Input
+                      <Input color="white"
                         type="number"
                         min="1"
                         value={exercise.sets}
@@ -339,7 +344,7 @@ export default function CoachWorkoutsPage() {
                       <FormLabel color="gray.400" fontSize="sm">
                         Reps
                       </FormLabel>
-                      <Input
+                      <Input color="white"
                         type="number"
                         min="1"
                         value={exercise.reps}
@@ -355,10 +360,10 @@ export default function CoachWorkoutsPage() {
                 </Grid>
 
                 <FormControl mt={3}>
-                  <FormLabel color="gray.400" fontSize="sm">
+                  <FormLabel color="white" fontSize="sm" >
                     Notes (optional)
                   </FormLabel>
-                  <Input
+                  <Input color="white"
                     value={exercise.notes}
                     onChange={(e) =>
                       updateExercise(index, "notes", e.target.value)
